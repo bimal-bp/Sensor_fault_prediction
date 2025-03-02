@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the saved model
-model = joblib.load('trained_model.pkl')
+# Load the saved models
+fault_model = joblib.load('trained_model.pkl')  # Load the fault prediction model
+anomaly_pipeline = joblib.load('isolation_forest_pipeline.pkl')  # Load the anomaly detection pipeline
 
 # Streamlit app title
-st.title("Equipment Fault Prediction App")
+st.title("Equipment Monitoring App")
 
 # Input fields for user
 st.header("Enter Equipment Details")
@@ -27,14 +28,29 @@ input_data = pd.DataFrame({
     'location': [location]
 })
 
-# Predict button
-if st.button("Predict"):
-    # Make prediction
-    prediction = model.predict(input_data)
-    
-    # Display prediction result
-    st.subheader("Prediction Result")
-    if prediction[0] == 0:
-        st.success("The equipment is predicted to be **NON-FAULTY**.")
-    else:
-        st.error("The equipment is predicted to be **FAULTY**.")
+# Buttons for prediction and anomaly detection
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("Predict Fault"):
+        # Make fault prediction
+        fault_prediction = fault_model.predict(input_data)
+        
+        # Display fault prediction result
+        st.subheader("Fault Prediction Result")
+        if fault_prediction[0] == 0:
+            st.success("The equipment is predicted to be **NON-FAULTY**.")
+        else:
+            st.error("The equipment is predicted to be **FAULTY**.")
+
+with col2:
+    if st.button("Detect Anomaly"):
+        # Make anomaly detection
+        anomaly_prediction = anomaly_pipeline.predict(input_data)
+        
+        # Display anomaly detection result
+        st.subheader("Anomaly Detection Result")
+        if anomaly_prediction[0] == 1:
+            st.success("The equipment is predicted to be **NORMAL**.")
+        else:
+            st.error("The equipment is predicted to be **ANOMALOUS**.")
